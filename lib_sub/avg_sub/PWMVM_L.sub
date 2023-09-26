@@ -1,0 +1,24 @@
+.subckt PWMVM_L nA nC nP nD MODE SW DIO Params: L=100u Fsw=100k DCMin=10m DCMax=0.99
+
+* .model MyD D(N=0.01 Rs = 100m)
+* MODE 0 - DCM\nMODE 1 - CCM
+* d2,CCM = 1 - d1\nd2,DCM = 1 - d1 - d3
+* VM CCM DCM MODEL
+
+B1 nA nP I=V(N)*I(VSense)
+B3 nD2 0 V=(2*L*Fsw*I(VSense)/(V(nDC)*V(nA,nC)+1u))-V(nDC)
+B5 N 0 V=V(nDC)/(V(nDC)+V(nD2C))
+B6 MODE 0 V=IF (2*L*Fsw*I(VSense)/(V(nDC)*V(nA,nC)+1u)-V(nDC) < (1-V(nDC)), 0, 1)
+B7 nDC 0 V=limit(V(nD), DCMin, DCMax)
+B8 nD2C 0 V=limit(V(nD2), DCMin, 1 - V(nDC))
+R1 nA nP 1G
+Vsense nCx nCz 0
+R2 N001 nCz 1m
+B2 nCx nP V=V(N)*V(nA,nP)
+B4 N001 nC V=V(SW)*V(nDC)+V(DIO)*(1-V(nDC))
+B9 0 SW I=I(Vsense)
+B10 0 DIO I=I(Vsense)
+R3 nD 0 10G
+
+.backanno
+.end

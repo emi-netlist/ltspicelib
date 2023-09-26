@@ -1,0 +1,17 @@
+.subckt PWMBCMCM a c p vc dc fsw ip ton params: L=1.2m RSense=0.5
+BEBd d 0 V=V(ton)*1u/(V(ton)*1u + V(toff))
+BEBVcp N001 p V=V(dc)*V(a,p)
+B1 a p I=V(dc)*I(VM)
+VM N001 c 0
+BEBtoff toff 0 V=IF( 2*I(VM)*{L}/V(c,p) < 0, 0, 2*I(VM)*{L}/V(c,p) )
+BEBfsw fsw 0 V=(1/(V(ton)*1u + V(toff)))/1k
+BEBIPeak ip 0 V=abs( abs(V(a,c)*V(ton)*1u)/{L} )
+B3 ton 0 V=((V(vc)*{L}/({RSense}*abs(v(a,c))))*1Meg) + 2 ;min Ton = 2us
+B4 dc 0 V=limit(V(d), 0.01, 0.99)
+R1 vc 0 10Meg
+
+* Note that this model does not need a negative Rsense for boost, as it is derived from the VM case\nby a duty ratio factory
+
+* -> we now deal with the peak current, and no longer ton, as an input set point
+.backanno
+.end

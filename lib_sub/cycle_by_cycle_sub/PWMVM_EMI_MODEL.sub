@@ -1,0 +1,66 @@
+.subckt PWMVM_EMI_MODEL OUT 0 CMP FB IMax params: VRef = 2.5 fsw = 100k Imax = 0.2 DRIVER_HIGH = 5 roa = 0.1 Vlow = 0 Vhigh = 5 fp = 20 aol = 1000 DISABLE_OPAMP = 0
+* to disable internal OPAMP - set DISABLE_OPAMP variable to 1 and increase roa to 100k, ground FB pin and apply feedback on CMP pin
+V3 S 0 PULSE({Vlow} {Vhigh} 0 1n 1n 10n {1/fsw})
+V4 RAMP 0 PULSE({Vlow} {Vhigh} 0 {1/(fsw)-2n} 1n 1n {1/(fsw)})
+B1 NHYS_A NINV_COMPARATOR_A V=IF(V(OUT_COMPARATOR_A) > (HIGH + LOW)/2, HYS, 0)
+R3 INV_COMPARATOR_A 0 10Meg
+R4 OUT_COMPARATOR_A N004 10
+B2 N004 0 V=IF(V(NHYS_A,INV_COMPARATOR_A) > 0, HIGH, LOW)
+C2 OUT_COMPARATOR_A 0 10p
+B3 N002 0 V=IF((V(IN1_OR) > VT_OR) | (V(IN2_OR) > VT_OR), 5, 0.1)
+R5 IN1_OR 0 10Meg
+R6 IN2_OR 0 10Meg
+R7 R N002 100
+C3 R 0 10p
+R10 N001 Q 1m
+R11 IN2_OR OUT_COMPARATOR_A 1m
+R12 NINV_COMPARATOR_A IMax 1m
+R13 INV_COMPARATOR_A N003 1m
+B6 NHYS_B NINV_COMPARATOR_B V=IF(V(OUT_COMPARATOR_B) > (HIGH + LOW)/2, HYS, 0)
+R14 INV_COMPARATOR_B 0 10Meg
+R24 OUT_COMPARATOR_B N009 10
+B8 N009 0 V=IF(V(NHYS_B,INV_COMPARATOR_B) > 0, HIGH, LOW)
+C8 OUT_COMPARATOR_B 0 10p
+R25 IN1_OR OUT_COMPARATOR_B 1m
+R26 NINV_COMPARATOR_B RAMP 1m
+R27 INV_COMPARATOR_B OUT_OPAMP 1m
+V5 N003 0 {Imax}
+E2 OUT 0 N001 0 {DRIVER_HIGH}
+A2 0 R 0 Qn 0 Q 0 0 OR td =1n tau = 2.34n
+A3 0 Q 0 S 0 Qn 0 0 OR tau = 1.2n
+R1 N1 0 {ROUT}
+C1 N1 0 {C1}
+G1 0 N1 N006 FB {Gm}
+R2 OUT_OPAMP N005 {roa}
+V1 N007 0 {Vlow}
+V2 N008 0 {VHigh}
+D1 N007 N1 MyD
+D2 N1 N008 MyD
+E1 N005 0 N1 0 1
+V6 N006 0 {VRef}
+R8 OUT_OPAMP CMP 0.1m
+*.param fsw = 100k
+.param HIGH = 5
+.param LOW = 0.1
+.param HYS = 0
+.param VT_OR = 2
+.param DUTYMAX = 0.8 DUTYMIN = 0.1
+.param Tsw = 1/fsw
+.param DRIVER_HIGH = 5
+*.param Imax = 50m
+* .PARAM VP = { (VLOW*DUTYMAX-VHIGH*DUTYMIN+VHIGH-VLOW)/(DUTYMAX-DUTYMIN) }     \n.PARAM VV = { (VLOW-DUTYMIN*VP)/(1-DUTYMIN)}
+* -> Vlow and Vhigh are representative and common for the op-amp output limits and the oscillator limits
+*.meas openloop_gain PARAM ROUT*Gm
+.model MyD D(N=0.1)
+*.meas origin_pole PARAM 1/(2*3.14*ROUT*C1)
+*.param fp = 1k
+*.param aol = 1000
+.param Gm = IF(DISABLE_OPAMP > 0, 0, 100u)
+.param ROUT = IF(DISABLE_OPAMP > 0, 1Meg, aol/Gm)
+.param C1 = IF(DISABLE_OPAMP > 0, 0, 1/(6.28*ROUT*fp))
+*.param Vlow = 0.01 VHigh = 2.5
+*.param roa=0.1
+*.param VRef = 2.5
+*.param DISABLE_OPAMP = 0
+.backanno
+.ends

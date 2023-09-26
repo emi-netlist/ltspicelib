@@ -1,0 +1,27 @@
+.SUBCKT OPAMP_EMI IN- IN+ OUT Params: VLOW = 0.01 VHIGH = 0.99 fp = 60 aol = 1000 roa = 0.1
+R1 N1 0 {ROUT}
+C1 N1 0 {C1}
+G1 0 N1 IN+ IN- {Gm}
+R2 OUT N001 {roa}
+V2 N002 0 {Vlow}
+V3 N003 0 {VHigh}
+D1 N002 N1 MyD
+D2 N1 N003 MyD
+E1 N001 0 N1 0 1
+.model D D
+.lib C:\users\kylie\Local Settings\Application Data\LTspice\lib\cmp\standard.dio
+* -> you can also use a voltage controlled voltage source E, for a simple solution, but only in ac simulations
+* -- in dc because the output is not clamped an E can give convergence problems
+.meas openloop_gain PARAM ROUT*Gm
+.model MyD D(N=0.1)
+.meas origin_pole PARAM 1/(2*3.14*ROUT*C1)
+.param fp = 60
+.param aol = 1000
+.param Gm = 100u
+.param ROUT = aol/Gm
+.param C1 = 1/(6.28*ROUT*fp)
+* -> corresponds to 20*log(1000) = 60 dB
+* where aOL = Gm * ROUT
+* .param Vlow = 0.01 VHigh = 0.99
+* .param roa=0.1
+.end

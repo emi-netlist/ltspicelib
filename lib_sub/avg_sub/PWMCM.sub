@@ -1,0 +1,22 @@
+.subckt PWMCM nA nC nP nVCtrl nD Params: L=100uH Fsw=100kHz DCMax=0.95 DCMin=0.05 RISense=1 Sa=100m
+*auto-toggling CM CCM-DCM PWM Switch Model
+B1 nA N003 I=V(nDC)/(V(nDC)+V(nD2C)+1u)*I(VSense)
+Vsense N001 nC 0
+B2 N003 N001 I=V(nVCtrl)/RISense
+B3 N001 N003 I=Sa*V(nDC)/RISense/Fsw+V(nC,nP)/L*V(nD2C)*(1-(V(nDC)+V(nD2C))/2)/Fsw
+B4 nD2 0 V=2*L*Fsw*I(VSense)/(V(nDC)*V(nA,nC)+1u)-V(nDC)
+B5 mode 0 V=IF(V(nD2) < 1 - V(nDC), 1p, 1/(L*pow(Fsw*3.14,2)))
+R3 N003 nP 1m
+B6 nD 0 V=V(nD2C)*V(nC,nP)/(V(nA,nP)-V(nC,nP)+1u)
+B11 nDC 0 V=Limit(V(nD), DCMin, DCMax)
+B12 nD2C 0 V=Limit( V(nD2), DCMin, (1 - V(nDC)) )
+VSense1 N001 N002 0
+B7 N002 N003 V=(1/V(CTRL))*V(int)
+B8 0 INT I=I(VSense1)
+C1 INT 0 1
+R4 INT 0 10Meg
+B9 CTRL 0 V=V(mode)
+R1 nVCtrl 0 1Meg
+.param Tsw = 1/Fsw
+.backanno
+.end

@@ -1,0 +1,7 @@
+.SUBCKT PWMCCMVM A C P d
+B1 A P I=V(d)*I(VM)
+B2 N001 P V=V(d)*V(a,p)
+VM N001 C 0
+R1 d 0 10Meg
+* the duty ratio (1 V represents 100% so 0.4 is 40%)
+.END PWMCCMVM

@@ -1,0 +1,5 @@
+* OPAMP_ALL_MODES(transient_ac_dc)
+.SUBCKT OPAMP_ALL_MODES IN+ IN- OUT params: aol=1000 fp=60
+E1 OUT 0 IN+ IN- Laplace = aol/(1+s/(2*3.14*fp))
+.backanno
+.end OPAMP_ALL_MODES

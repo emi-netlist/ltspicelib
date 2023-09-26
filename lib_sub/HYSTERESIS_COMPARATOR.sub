@@ -1,0 +1,12 @@
+* C:\users\kylie\My Documents\lt_spice_projects\SMPS\cbasso_ltspice\ale mele\chapter_4(basic blocks and generic switched models)\hysteresis_comparator.asc
+.SUBCKT HYS_COMPARATOR NINV INV OUT params: HIGH=5 LOW=0.1 HYS=1
+B1 NHYS NINV V=IF(V(OUT) > (HIGH + LOW)/2, HYS, 0)
+R1 INV 0 10Meg
+R2 OUT N001 10
+B2 N001 0 V=IF(V(NHYS,INV) > 0, HIGH, LOW)
+C1 OUT 0 10p
+* here V_threshold_high = 2.5V (i.e., V(INV))\nand V_threshold_low = 1.5V (i.e., 2.5 - HYS)
+* for result plot V(OUT) and V(NINV)
+* for the comparator graph plot V(OUT), then on x-axis plot V(NINV) the input signal, instead of time
+.backanno
+.end HYS_COMPARATOR

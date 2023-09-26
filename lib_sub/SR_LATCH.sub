@@ -1,0 +1,9 @@
+
+.SUBCKT SR_LATCH S R Q Qb params: VHIGH = 5
+R1 S 0 10Meg
+R2 R 0 10Meg
+B1 Q 0 V=IF((V(R) < VT) & ((V(S) > VT) | (V(Qb)<VT)), VHIGH, 0)
+B2 Qb 0 V=IF((V(R) > VT) | ((V(Q) < VT) & (V(S)<VT)), VHIGH, 0)
+.param VT = VHIGH/2
+.backanno
+.end SR_LATCH

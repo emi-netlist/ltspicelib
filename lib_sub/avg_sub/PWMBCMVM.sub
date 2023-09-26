@@ -1,0 +1,13 @@
+.subckt PWMBCMVM a c p vc dc fsw ip params: L=100u
+BEBd d 0 V=V(vc)*1u/(v(vc)*1u + v(toff))
+BEBVcp N001 p V=V(dc)*V(a,p)
+B1 a p I=V(dc)*I(VSense)
+VSense N001 c 0
+BEBtoff toff 0 V=IF ( 2*I(VSense)*{L}/V(c,p) < 0, 0, 2*I(VSense)*{L}/(V(c,p)+10n) )
+BEBFsw fsw 0 V=1/( V(vc)*1u + V(toff))/1k
+BEBIPeak ip 0 V=abs( V(a,c)*V(vc)*1u/L )
+B3 dc 0 V=limit(V(d), 0.01, 0.99)
+R1 Vc 0 10Meg
+* -> 1V for vc equal 1us for ton, i.e., V(vc) represents ton
+.backanno
+.end PWMBCMVM

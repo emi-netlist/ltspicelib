@@ -1,0 +1,12 @@
+.SUBCKT DYNAMIC_TRANSFORMER 1 2 3 4 d
+B1 1 2 I=I(VM)*V(d)
+Rp1 1 2 1Meg
+RS 3 N001 1µ
+VM N002 N001 0
+B2 N002 4 V=V(1,2)*V(d)
+Rp2 d 0 1Meg
+* the ideal transformer equations can be easily derived as\nPin = Pout\nV1 * I1 = V2 * I2 (note that V1 represent the voltage across the primary, V2 the voltage across the\nsecondary, I1 the current through the primary and I2 the current through the secondary)\n \nI1 = V2/V1 * I2 = NI2 (where Ns/Np = V2/V1)\n \nV2 = I1/I2 * V1 = NV1 (where Ns/Np = I1/I2)
+* (In other words, the input current I1 is the output current I2 multiplied by N,\nwhereas the output voltage V2 corresponds to the input voltage V1 also multiplied\nby N.)
+* Rs and Rp are added to avoid convergence problems when associating the transformer with other elements.
+.backanno
+.ends DYNAMIC_TRANSFORMER
