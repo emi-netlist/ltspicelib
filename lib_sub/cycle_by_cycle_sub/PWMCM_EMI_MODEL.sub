@@ -1,0 +1,63 @@
+.subckt PWMCM_EMI_MODEL OUT 0 CMP FB SENS RAMP params: VRef = 2.5 fsw = 100k Vlow = 0.01 Vhigh = 5 VOSC_H = 1.2 DRIVER_HIGH = 5 roa = 0.1 fp = 20 aol = 1000 RATIO = 0.033 DISABLE_OPAMP = 0
+* to disable internal OPAMP - set DISABLE_OPAMP variable to 1 and increase roa to 100k, ground FB pin and apply feedback on CMP pin
+R1 N1 0 {ROUT}
+C1 N1 0 {C1}
+G1 0 N1 N005 FB {Gm}
+R2 N2 N004 {roa}
+V1 N006 0 {Vlow}
+V2 N007 0 {Vhigh}
+D1 N006 N1 MyD
+D2 N1 N007 MyD
+E1 N004 0 N1 0 1
+V3 S 0 PULSE({Vlow} {Vhigh} 0 1n 1n 10n {1/fsw})
+V4 RAMP 0 PULSE({Vlow} {VOSC_H} 0 {1/(fsw)-2n} 1n 1n {1/(fsw)})
+B1 NHYS NINV_COMPARATOR V=IF(V(OUT_COMPARATOR) > (HIGH + LOW)/2, HYS, 0)
+R3 INV_COMPARATOR 0 10Meg
+R4 OUT_COMPARATOR N003 10
+B2 N003 0 V=IF(V(NHYS,INV_COMPARATOR) > 0, HIGH, LOW)
+C2 OUT_COMPARATOR 0 10p
+B3 N002 0 V=IF((V(IN1_OR) > VT_OR) | (V(IN2_OR) > VT_OR), 5, 0.1)
+R5 IN1_OR 0 10Meg
+R6 IN2_OR 0 10Meg
+R7 R N002 100
+C3 R 0 10p
+R8 S 0 10Meg
+R9 R 0 10Meg
+R11 IN2_OR OUT_COMPARATOR 1m
+R12 NINV_COMPARATOR SENS 1m
+R13 INV_COMPARATOR OUT_OPAMP 1m
+V5 MAX_DUTY_RESET 0 PULSE({Vlow} {Vhigh} {Tsw*DUTYMAX} 1n 1n {Tsw - Tsw*DUTYMAX-2n} {1/fsw})
+R14 IN1_OR MAX_DUTY_RESET 1m
+B6 OUT_OPAMP 0 V=V(N2)*RATIO
+V6 N005 0 {VRef}
+R24 N001 Q 1m
+E2 OUT 0 N001 0 {DRIVER_HIGH}
+A2 0 R 0 Qn 0 Q 0 0 OR td =1n tau = 2.34n
+A3 0 Q 0 S 0 Qn 0 0 OR tau = 1.2n
+R10 N2 CMP 0.1m
+*.meas openloop_gain PARAM ROUT*Gm
+.model MyD D(N=0.1)
+*.meas origin_pole PARAM 1/(2*3.14*ROUT*C1)
+*.param fp = 200
+*.param aol = 1000
+.param Gm = IF(DISABLE_OPAMP > 0, 0, 100u)
+.param ROUT = IF(DISABLE_OPAMP > 0, 1Meg, aol/Gm)
+.param C1 = IF(DISABLE_OPAMP > 0, 0, 1/(6.28*ROUT*fp))
+*.param Vlow = 0.01 VHigh = 3
+*.param roa=0.1
+*.param fsw = 250k
+.param HIGH = 5
+.param LOW = 0.1
+.param HYS = 0
+.param VT_OR = 2
+.param DUTYMAX = 0.8
+.param Tsw = 1/fsw
+*.param RATIO = 0.033
+*.param VRef = 2.5
+.param DRIVER_HIGH = 5
+*.param VOSC_H = 1.2
+* -> where DUTYMAX*Tsw = ton,max
+* -> Vlow and Vhigh are representative and common for the op-amp output limits and the oscillator limits
+*.param DISABLE_OPAMP = 0
+.backanno
+.ends
